@@ -41,11 +41,22 @@ class Handler extends ExceptionHandler
      * Render an exception into an HTTP response.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
+     * @param  \Exception  $e
      * @return \Illuminate\Http\Response
      */
-    public function render($request, Exception $exception)
+    public function render($request, Exception $e)
     {
-        return parent::render($request, $exception);
+        if (config('app.debug'))
+        {
+            $whoops = new \Whoops\Run;
+            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+
+            return response($whoops->handleException($e),
+                $e->getStatusCode(),
+                $e->getHeaders()
+            );
+        }
+
+        return parent::render($request, $e);
     }
 }
